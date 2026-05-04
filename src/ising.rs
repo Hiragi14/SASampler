@@ -161,6 +161,11 @@ impl IsingProblem {
     }
 
     /// 与えられたスピン状態のエネルギーを計算する。
+    /// # Arguments
+    /// - `state` - スピン状態を表すベクトル。`state[i]` はスピン `s_i` の値を表す。
+    ///     - `state[i]` は `-1` または `+1` のいずれかでなければならない。
+    /// # Returns
+    /// - `state` に対応するエネルギー値を返す。
     pub fn energy(&self, state: &[i8]) -> f64 {
         assert_eq!(state.len(), self.num_vars());
 
@@ -182,6 +187,27 @@ impl IsingProblem {
         e
     }
 
+    /// 変数 `var` をフリップしたときのエネルギー変化量 $\Delta E$ を計算する。
+    /// # Arguments
+    /// - `state` - 現在のスピン状態を表すベクトル。`state[i]` はスピン `s_i` の値を表す。
+    ///     - `state[i]` は `-1` または `+1` のいずれかでなければならない。
+    /// - `var` - フリップする変数のインデックス。
+    /// # Returns
+    /// - 変数 `var` をフリップしたときのエネルギー変化量 $\Delta E$ を返す。
+    /// # Notes
+    /// 
+    /// $$
+    /// \Delta E_{var} = h_{var} s_{var} + \sum_{j} J_{var,j} s_{var} s_j
+    /// $$
+    /// $$
+    /// \Delta E_{var} = s_{var} (h_{var} + \sum_{j} J_{var,j} s_j)
+    /// $$
+    /// $$
+    /// \Delta E_{var} = s_{var} \cdot local\_field
+    /// $$
+    /// 
+    /// したがって、スピンを反転すると、$s_{var}$ が $-s_{var}$ になるため、$\Delta E$ は 
+    /// $-2 s_{var} \cdot local\_field$ となる。
     pub fn flip_delta_energy(&self, state: &[i8], var: usize) -> f64 {
         let mut local_field = self.h[var];
 
@@ -195,6 +221,12 @@ impl IsingProblem {
         -2.0 * state[var] as f64 * local_field
     }
 
+    /// 各変数をフリップしたときのエネルギー変化量のベクトルを計算する。
+    /// # Arguments
+    /// - `state` - 現在のスピン状態を表すベクトル。`state[i]` はスピン `s_i` の値を表す。
+    ///     - `state[i]` は `-1` または `+1` のいずれかでなければならない。
+    /// # Returns
+    /// - 各変数をフリップしたときのエネルギー変化量のベクトルを返す。`delta_energy[i]` は変数 `i` をフリップしたときのエネルギー変化量を表す。
     pub fn initial_delta_energy(&self, state: &[i8]) -> Vec<f64> {
         (0..self.num_vars())
             .map(|i| self.flip_delta_energy(state, i))
