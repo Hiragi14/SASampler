@@ -1,0 +1,12 @@
+[build-system]
+requires = ["maturin>=1.8,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "sasampler"
+version = "0.1.0"
+requires-python = ">=3.9"
+description = "Rust implementation of simulated annealing for Ising and QUBO problems"
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
